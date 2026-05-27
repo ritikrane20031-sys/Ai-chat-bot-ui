@@ -1,197 +1,948 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dental AI Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Real Estate AI Assistant | ACME Realty (Frontend Demo)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #d9f0ff, #eef7ff);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+        body {
+            background: linear-gradient(145deg, #e0eaf4 0%, #cfdef3 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-    .chat-container {
-      width: 380px;
-      height: 600px;
-      background: #fff;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
+        .assistant-card {
+            max-width: 750px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .header {
-      background: #0077b6;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 18px;
-    }
+        .acme-header {
+            background: #0a2b3e;
+            padding: 1.4rem 2rem;
+            border-bottom: 4px solid #f5b042;
+        }
 
-    .chat-box {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+        .acme-header h1 {
+            color: white;
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
 
-    .message {
-      padding: 10px 14px;
-      border-radius: 15px;
-      max-width: 75%;
-      font-size: 14px;
-    }
+        .acme-header h1 span {
+            font-weight: 300;
+            font-size: 1.2rem;
+        }
 
-    .bot {
-      background: #e9ecef;
-      align-self: flex-start;
-    }
+        .chat-area {
+            padding: 1.5rem 2rem;
+            background: #fefcf5;
+            flex: 1;
+            min-height: 400px;
+            max-height: 480px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
 
-    .user {
-      background: #0077b6;
-      color: white;
-      align-self: flex-end;
-    }
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 90%;
+            animation: fadeSlideUp 0.25s ease-out;
+        }
 
-    .footer {
-      display: flex;
-      border-top: 1px solid #ddd;
-    }
+        .message.agent {
+            align-self: flex-start;
+        }
 
-    input {
-      flex: 1;
-      border: none;
-      padding: 12px;
-      font-size: 14px;
-      outline: none;
-    }
+        .message.user {
+            align-self: flex-end;
+        }
 
-    button {
-      background: #0077b6;
-      color: white;
-      border: none;
-      padding: 12px 16px;
-      cursor: pointer;
-    }
+        .bubble {
+            padding: 0.9rem 1.3rem;
+            border-radius: 1.5rem;
+            font-size: 1rem;
+            line-height: 1.45;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            word-break: break-word;
+        }
 
-    button:hover {
-      background: #005f8a;
-    }
-  </style>
+        .agent .bubble {
+            background: #e9edf2;
+            color: #1a2c3e;
+            border-bottom-left-radius: 0.4rem;
+        }
+
+        .user .bubble {
+            background: #0a2b3e;
+            color: white;
+            border-bottom-right-radius: 0.4rem;
+        }
+
+        .agent-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            margin-left: 0.5rem;
+            color: #5b6f82;
+            text-transform: uppercase;
+        }
+
+        .inline-choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 0.85rem;
+        }
+
+        .choice-chip {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e6;
+            border-radius: 40px;
+            padding: 0.5rem 1.1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #0f2c3f;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .choice-chip:hover {
+            background: #f5b042;
+            border-color: #e09d2c;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-panel {
+            background: #ffffff;
+            border-top: 1px solid #edece4;
+            padding: 1rem 2rem 1.2rem;
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: #f8fafc;
+            border-radius: 60px;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+        }
+
+        .chat-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            padding: 0.5rem 0;
+        }
+
+        .send-btn {
+            background: #0a2b3e;
+            border: none;
+            border-radius: 40px;
+            padding: 0.6rem 1.4rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #f5b042;
+            color: #0a2b3e;
+        }
+
+        .footer-meta {
+            background: #ffffff;
+            padding: 0.7rem 2rem 1rem;
+            border-top: 1px solid #edece4;
+            font-size: 0.7rem;
+            color: #8b9aad;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #f0f2f5;
+            border: none;
+            padding: 0.45rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #4a627a;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 0.6rem 1.2rem;
+            background: #e9edf2;
+            border-radius: 1.5rem;
+            width: fit-content;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: #5f7f9e;
+            border-radius: 50%;
+            animation: pulse 1.2s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0%, 60%, 100% { transform: scale(0.6); opacity: 0.5; }
+            30% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #0a2b3e;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f5b042;
+            padding-bottom: 0.5rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 0.75rem 0.5rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day:hover {
+            background: #f5b042;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .calendar-day.selected {
+            background: #0a2b3e;
+            color: white;
+        }
+
+        .calendar-day.disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .time-slot {
+            padding: 0.75rem;
+            text-align: center;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e6;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-slot:hover {
+            background: #f5b042;
+            border-color: #e09d2c;
+        }
+
+        .time-slot.selected {
+            background: #0a2b3e;
+            color: white;
+            border-color: #0a2b3e;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #0a2b3e;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e6;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #f5b042;
+        }
+
+        .submit-btn {
+            background: #0a2b3e;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: #f5b042;
+            color: #0a2b3e;
+        }
+
+        .close-modal {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #94a3b8;
+        }
+
+        .close-modal:hover {
+            color: #0a2b3e;
+        }
+
+        @media (max-width: 550px) {
+            .chat-area { padding: 1rem; }
+            .chat-input-panel { padding: 0.8rem 1rem; }
+            .calendar-grid { gap: 0.25rem; }
+            .calendar-day { padding: 0.5rem 0.25rem; font-size: 0.75rem; }
+            .time-slots { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
-
 <body>
+<div class="assistant-card">
+    <div class="acme-header">
+        <h1>Real Estate. <span>✦ realty AI</span></h1>
+    </div>
+    <div class="chat-area" id="chatContainer"></div>
 
-<div class="chat-container">
-  <div class="header">🦷 Dental AI Assistant</div>
+    <div class="chat-input-panel">
+        <div class="input-wrapper">
+            <input type="text" class="chat-input" id="chatTextInput" placeholder="Ask about properties, or type 'schedule appointment'..." autocomplete="off">
+        </div>
+        <button class="send-btn" id="sendChatBtn">Send ✈️</button>
+    </div>
 
-  <div class="chat-box" id="chatBox"></div>
+    <div class="footer-meta">
+        <div>🏡 ACME smart assistant — real-time AI</div>
+        <button class="reset-btn" id="resetChatBtn">⟳ Start over</button>
+    </div>
+</div>
 
-  <div class="footer">
-    <input type="text" id="input" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
+<!-- Modal for Appointment Scheduling -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div class="modal-header">📅 Schedule an Appointment</div>
+        
+        <!-- Step 1: Select Date -->
+        <div id="step1">
+            <h3 style="margin-bottom: 1rem;">Select Date</h3>
+            <div id="calendar" class="calendar-grid"></div>
+            <button onclick="nextToTime()" class="submit-btn" id="nextToTimeBtn" style="background: #f5b042; color: #0a2b3e;">Next →</button>
+        </div>
+        
+        <!-- Step 2: Select Time -->
+        <div id="step2" style="display: none;">
+            <h3 style="margin-bottom: 1rem;">Select Time Slot</h3>
+            <div id="timeSlots" class="time-slots"></div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                <button onclick="prevToDate()" class="submit-btn" style="background: #94a3b8;">← Back</button>
+                <button onclick="nextToForm()" class="submit-btn" id="nextToFormBtn" style="background: #f5b042; color: #0a2b3e;">Next →</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Form Details -->
+        <div id="step3" style="display: none;">
+            <h3 style="margin-bottom: 1rem;">Your Details</h3>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="fullName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="phone" required placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Property Interest</label>
+                    <select id="propertyInterest">
+                        <option value="Buying a House">🏠 Buying a House</option>
+                        <option value="Buying an Apartment">🏙️ Buying an Apartment</option>
+                        <option value="Selling Property">💰 Selling Property</option>
+                        <option value="Renting">🔑 Renting</option>
+                        <option value="Investment">📈 Investment</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Additional Message (Optional)</label>
+                    <textarea id="message" rows="3" placeholder="Any specific requirements..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">✅ Confirm Appointment</button>
+            </form>
+            <button onclick="prevToTime()" class="submit-btn" style="background: #94a3b8; margin-top: 0.5rem;">← Back</button>
+        </div>
+    </div>
 </div>
 
 <script>
-  const chatBox = document.getElementById("chatBox");
+    // ========== FRONTEND DEMO - NO BACKEND DEPENDENCIES ==========
+    let currentBotMessageElement = null;
+    let isGenerating = false;
+    
+    // Appointment Data
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentStep = 1;
 
-  function speak(text) {
-    if ('speechSynthesis' in window) {
-      const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = "en-US";
-      window.speechSynthesis.speak(speech);
-    }
-  }
-
-  function addMessage(text, sender) {
-    const div = document.createElement("div");
-    div.classList.add("message", sender);
-    div.innerText = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
-
-  function botReply(text) {
-    addMessage(text, "bot");
-    speak(text);
-  }
-
-  function sendMessage() {
-    const input = document.getElementById("input");
-    const text = input.value.trim();
-
-    if (text === "") return;
-
-    addMessage(text, "user");
-    input.value = "";
-
-    setTimeout(() => {
-      handleAI(text);
-    }, 800);
-  }
-
-  // Simple AI Logic
-  let step = 0;
-  let userData = {};
-
-  function handleAI(text) {
-    text = text.toLowerCase();
-
-    if (step === 0) {
-      if (text.includes("appointment") || text.includes("book")) {
-        step = 1;
-        botReply("May I have your full name, please?");
-      } else {
-        botReply("I can help you book an appointment. Please say 'book appointment'.");
-      }
+    // ========== UI FUNCTIONS ==========
+    function scrollToBottom() {
+        const chatArea = document.getElementById('chatContainer');
+        if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    else if (step === 1) {
-      userData.name = text;
-      step = 2;
-      botReply("What date would you prefer?");
+    function addMessage(role, text, showName = true, isStreamingMessage = false) {
+        const chatContainer = document.getElementById('chatContainer');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}`;
+        
+        if (role === 'agent' && showName) {
+            const nameSpan = document.createElement('div');
+            nameSpan.className = 'agent-name';
+            nameSpan.innerText = '🏢 ACME REALTY AI';
+            messageDiv.appendChild(nameSpan);
+        }
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        
+        if (isStreamingMessage) {
+            bubble.innerHTML = '';
+        } else {
+            bubble.innerHTML = text;
+        }
+        
+        messageDiv.appendChild(bubble);
+        chatContainer.appendChild(messageDiv);
+        scrollToBottom();
+        
+        return bubble;
     }
 
-    else if (step === 2) {
-      userData.date = text;
-      step = 3;
-      botReply("What time works best for you?");
+    function showTypingIndicator() {
+        const chatContainer = document.getElementById('chatContainer');
+        const indicator = document.createElement('div');
+        indicator.className = 'typing-indicator';
+        indicator.id = 'typing-indicator';
+        indicator.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        chatContainer.appendChild(indicator);
+        scrollToBottom();
     }
 
-    else if (step === 3) {
-      userData.time = text;
-      step = 4;
-      botReply(`Great ${userData.name}, your appointment is booked on ${userData.date} at ${userData.time}.`);
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
     }
 
-    else {
-      botReply("Your session is complete. Thank you!");
+    // ========== AI RESPONSE GENERATOR (NO BACKEND) ==========
+    function generateAIResponse(userMessage) {
+        const msg = userMessage.toLowerCase();
+        
+        if (msg.includes('house') || msg.includes('buy a house') || msg.includes('villa')) {
+            return "🏡 Great choice! We have beautiful houses for sale:<br><br>• 🌲 Cedar Grove Villa - $450k, 4 bedrooms, pool, garden<br>• 🏡 Maple Street Colonial - $375k, 3 bedrooms, renovated kitchen<br>• 🌅 Sunset Ranch Estate - $895k, 5 bedrooms, lake view, 2 acres<br><br>Would you like a virtual tour or to speak with an agent?";
+        }
+        else if (msg.includes('apartment') || msg.includes('flat')) {
+            return "🏙️ Excellent! Our premium apartments:<br><br>• 🌆 Metro Loft - $320k, 2 bedrooms, city view, gym<br>• 🌊 Harbor Lights - $540k, 3 bedrooms, waterfront, pool<br>• 🗼 Sky Tower - $780k, 2 bedrooms luxury penthouse, concierge<br><br>Interested in any of these?";
+        }
+        else if (msg.includes('condo') || msg.includes('condominium')) {
+            return "🏢 Modern condos with premium amenities:<br><br>• 🏖️ Seaside Resort Condo - $410k, 2 bedrooms, beach access<br>• 🏙️ Urban Core Condo - $295k, 1 bedroom, modern downtown<br>• 🗻 The Pinnacle - $675k, 3 bedrooms, rooftop terrace<br><br>Shall I schedule a private showing?";
+        }
+        else if (msg.includes('price') || msg.includes('trend') || msg.includes('market')) {
+            return "📊 Current Real Estate Market Trends:<br><br>• 🏡 Single-family homes: +5.2% year-over-year<br>• 🏙️ Condos/Apartments: +4.1% in downtown areas<br>• 💰 Mortgage rates: 30-year fixed at 6.8%<br>• 📈 Inventory levels: Limited supply driving competition<br><br>Need personalized investment advice?";
+        }
+        else if (msg.includes('loan') || msg.includes('mortgage') || msg.includes('finance') || msg.includes('home loan')) {
+            return "🏦 Home Loan & Mortgage Guide:<br><br>✅ Pre-approval within 24 hours<br>✅ Down payment as low as 5% for qualified buyers<br>✅ Competitive rates from top lenders (6.5% - 7.2%)<br>✅ First-time home buyer programs available<br><br>Would you like a consultation with our mortgage specialist?";
+        }
+        else if (msg.includes('neighborhood') || msg.includes('area') || msg.includes('locality') || msg.includes('community')) {
+            return "📍 Popular Neighborhoods:<br><br>🌟 Downtown: Vibrant nightlife, walkable, luxury condos<br>🌳 Green Valley: Family-friendly, top-rated schools, parks<br>🏞️ Lakeside: Exclusive estates, water views, privacy<br>🏘️ Oakwood: Affordable homes, growing community<br><br>Tell me your budget and I'll suggest the perfect area!";
+        }
+        else if (msg.includes('sell') || msg.includes('selling')) {
+            return "💰 Selling your property?<br><br>• Free home valuation within 24 hours<br>• Professional photography & 3D tours<br>• Access to 10,000+ qualified buyers<br>• Our agents have 95% success rate at asking price<br><br>Ready to list your property?";
+        }
+        else if (msg.includes('rent') || msg.includes('rental')) {
+            return "🔑 Rental Properties Available:<br><br>• 🏠 2BR House - $2,200/month in Green Valley<br>• 🏙️ 1BR Apartment - $1,800/month Downtown<br>• 🏢 3BR Condo - $3,100/month Lakeside<br><br>Lease terms from 6-24 months available. Schedule a viewing today!";
+        }
+        else if (msg.includes('thank')) {
+            return "You're very welcome! 😊<br><br>I'm here 24/7 to help with all your real estate needs. Feel free to ask about properties, prices, neighborhoods, or schedule a personal consultation with our experts!";
+        }
+        else if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey')) {
+            return "Hello! 👋<br><br>Welcome to ACME Realty AI! I can help you find the perfect property, provide market insights, or schedule appointments with our agents.<br><br>What would you like to explore today?";
+        }
+        else {
+            return "🌟 I'm your real estate AI assistant!<br><br>I can help you with:<br><br>• 🏠 Finding houses, apartments, or condos<br>• 📊 Current market trends & prices<br>• 🏦 Home loan & mortgage guidance<br>• 📍 Neighborhood insights<br>• 📅 Scheduling appointments with agents<br><br><strong>Try asking:</strong><br>'Show me houses', 'Apartment prices', 'Market trends', 'Home loan guide', or 'Schedule appointment'";
+        }
     }
-  }
 
-  // Enter key support
-  document.getElementById("input").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-      sendMessage();
+    // Simulated streaming response with typing effect
+    async function simulateStreamingResponse(fullText) {
+        const bubble = addMessage('agent', '', true, true);
+        let accumulated = '';
+        const words = fullText.split(/(?=[<>])|(?<=[.!?])\s+|\s+/);
+        
+        for (let i = 0; i < words.length; i++) {
+            let chunk = words[i];
+            accumulated += chunk;
+            bubble.innerHTML = accumulated;
+            scrollToBottom();
+            await new Promise(resolve => setTimeout(resolve, 15 + Math.random() * 10));
+        }
+        return bubble;
     }
-  });
 
-  // Initial greeting
-  window.onload = () => {
-    botReply("Hello, thank you for calling Healthcare on Collins. How can I help you today?");
-  };
+    async function sendMessage(messageText) {
+        if (isGenerating) return;
+        const trimmed = messageText.trim();
+        if (trimmed === "") return;
+        
+        // Check for appointment scheduling intent
+        if (trimmed.toLowerCase().includes('schedule') || 
+            trimmed.toLowerCase().includes('appointment') ||
+            trimmed.toLowerCase().includes('book a meeting') ||
+            trimmed.toLowerCase().includes('meet with agent')) {
+            addMessage('user', trimmed);
+            document.getElementById('chatTextInput').value = '';
+            addMessage('agent', "Sure! I'll help you schedule an appointment with our real estate expert. Please select your preferred date and time from the calendar below 👇");
+            setTimeout(() => {
+                openCalendar();
+            }, 500);
+            return;
+        }
+        
+        addMessage('user', trimmed);
+        document.getElementById('chatTextInput').value = '';
+        showTypingIndicator();
+        isGenerating = true;
+        
+        try {
+            const responseText = generateAIResponse(trimmed);
+            removeTypingIndicator();
+            await simulateStreamingResponse(responseText);
+            
+            // Add schedule suggestion button after response
+            addScheduleSuggestion();
+        } catch (error) {
+            removeTypingIndicator();
+            addMessage('agent', "I'm here to help with real estate! Try asking about houses, apartments, prices, or schedule an appointment.");
+        } finally {
+            isGenerating = false;
+        }
+    }
+    
+    function addScheduleSuggestion() {
+        const chatContainer = document.getElementById('chatContainer');
+        const scheduleDiv = document.createElement('div');
+        scheduleDiv.className = 'inline-choices';
+        scheduleDiv.style.marginTop = '10px';
+        
+        const scheduleBtn = document.createElement('button');
+        scheduleBtn.className = 'choice-chip';
+        scheduleBtn.innerHTML = '📅 Schedule an Appointment';
+        scheduleBtn.style.background = '#f5b042';
+        scheduleBtn.style.color = '#0a2b3e';
+        scheduleBtn.style.fontWeight = 'bold';
+        scheduleBtn.onclick = () => {
+            openCalendar();
+        };
+        
+        scheduleDiv.appendChild(scheduleBtn);
+        chatContainer.appendChild(scheduleDiv);
+        scrollToBottom();
+    }
+
+    // ========== CALENDAR & APPOINTMENT FUNCTIONS ==========
+    function openCalendar() {
+        const modal = document.getElementById('appointmentModal');
+        modal.style.display = 'flex';
+        currentStep = 1;
+        selectedDate = null;
+        selectedTime = null;
+        showStep1();
+        generateCalendar();
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('appointmentModal');
+        modal.style.display = 'none';
+        resetModal();
+    }
+
+    function resetModal() {
+        selectedDate = null;
+        selectedTime = null;
+        currentStep = 1;
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'none';
+        document.getElementById('appointmentForm').reset();
+    }
+
+    function showStep1() {
+        document.getElementById('step1').style.display = 'block';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'none';
+    }
+
+    function generateCalendar() {
+        const calendar = document.getElementById('calendar');
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+        
+        calendar.innerHTML = '';
+        
+        // Day headers
+        const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        dayHeaders.forEach(day => {
+            const header = document.createElement('div');
+            header.textContent = day;
+            header.style.fontWeight = 'bold';
+            header.style.textAlign = 'center';
+            header.style.padding = '0.5rem';
+            header.style.color = '#0a2b3e';
+            calendar.appendChild(header);
+        });
+        
+        // Empty cells for days before month starts
+        for (let i = 0; i < startingDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-day disabled';
+            emptyCell.textContent = '';
+            calendar.appendChild(emptyCell);
+        }
+        
+        // Generate days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(currentYear, currentMonth, day);
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            dayDiv.textContent = day;
+            
+            // Disable past dates
+            if (date < today && date.toDateString() !== today.toDateString()) {
+                dayDiv.classList.add('disabled');
+            } else {
+                dayDiv.onclick = () => selectDate(dateStr, dayDiv);
+            }
+            
+            if (selectedDate === dateStr) {
+                dayDiv.classList.add('selected');
+            }
+            
+            calendar.appendChild(dayDiv);
+        }
+    }
+
+    function selectDate(dateStr, element) {
+        document.querySelectorAll('.calendar-day').forEach(el => {
+            el.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        selectedDate = dateStr;
+    }
+
+    function nextToTime() {
+        if (!selectedDate) {
+            alert('Please select a date first');
+            return;
+        }
+        currentStep = 2;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+        document.getElementById('step3').style.display = 'none';
+        generateTimeSlots();
+    }
+
+    function generateTimeSlots() {
+        const timeSlotsContainer = document.getElementById('timeSlots');
+        const timeSlots = [
+            '09:00 AM', '10:00 AM', '11:00 AM', 
+            '12:00 PM', '01:00 PM', '02:00 PM', 
+            '03:00 PM', '04:00 PM', '05:00 PM'
+        ];
+        
+        timeSlotsContainer.innerHTML = '';
+        selectedTime = null;
+        
+        timeSlots.forEach(slot => {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'time-slot';
+            slotDiv.textContent = slot;
+            slotDiv.onclick = () => {
+                document.querySelectorAll('.time-slot').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                slotDiv.classList.add('selected');
+                selectedTime = slot;
+            };
+            timeSlotsContainer.appendChild(slotDiv);
+        });
+    }
+
+    function nextToForm() {
+        if (!selectedTime) {
+            alert('Please select a time slot');
+            return;
+        }
+        currentStep = 3;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step3').style.display = 'block';
+    }
+
+    function prevToDate() {
+        if (currentStep === 2) {
+            currentStep = 1;
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+        } else if (currentStep === 3) {
+            currentStep = 2;
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step3').style.display = 'none';
+        }
+    }
+
+    function prevToTime() {
+        if (currentStep === 3) {
+            currentStep = 2;
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step3').style.display = 'none';
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('fullName').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const propertyInterest = document.getElementById('propertyInterest').value;
+        const message = document.getElementById('message').value;
+        
+        if (!fullName || !phone || !email) {
+            alert('Please fill all required fields');
+            return;
+        }
+        
+        // Format date
+        const [year, month, day] = selectedDate.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+        
+        // Create appointment summary
+        const appointmentSummary = `
+📅 <strong>Appointment Confirmed!</strong><br><br>
+<strong>Date:</strong> ${formattedDate}<br>
+<strong>Time:</strong> ${selectedTime}<br>
+<strong>Name:</strong> ${fullName}<br>
+<strong>Phone:</strong> ${phone}<br>
+<strong>Email:</strong> ${email}<br>
+<strong>Property Interest:</strong> ${propertyInterest}<br>
+${message ? `<strong>Message:</strong> ${message}<br>` : ''}
+<br>
+✨ A confirmation has been sent to ${email}<br>
+📞 Our agent will call you at ${phone} shortly before the appointment.
+        `;
+        
+        // Close modal
+        closeModal();
+        
+        // Add confirmation message to chat
+        addMessage('agent', appointmentSummary);
+        
+        // Reset form
+        document.getElementById('appointmentForm').reset();
+    });
+
+    function resetChat() {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.innerHTML = '';
+        
+        const welcomeHTML = `Hello! 👋<br><br>Welcome to ACME Realty AI! I'm your intelligent property assistant.<br><br>🏡 I can help you with:<br>• Property listings and prices<br>• Neighborhood insights<br>• Market trends and analysis<br>• Home loan guidance<br>• Investment advice<br>• 📅 Schedule appointments with our agents<br><br><strong>What would you like to know about real estate today?</strong>`;
+        
+        addMessage('agent', welcomeHTML, true);
+        
+        // Add quick suggestion chips
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.className = 'inline-choices';
+        const suggestions = [
+            { label: '🏠 Show me houses', query: 'Show me houses for sale' },
+            { label: '💰 Price trends', query: 'What are current real estate prices?' },
+            { label: '📅 Schedule Appointment', query: 'schedule appointment' },
+            { label: '🏦 Home loan guide', query: 'How do I get a home loan?' }
+        ];
+        
+        suggestions.forEach(sug => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-chip';
+            btn.innerText = sug.label;
+            btn.onclick = () => {
+                document.getElementById('chatTextInput').value = sug.query;
+                sendMessage(sug.query);
+            };
+            suggestionsDiv.appendChild(btn);
+        });
+        
+        chatContainer.appendChild(suggestionsDiv);
+        scrollToBottom();
+    }
+
+    // ========== EVENT LISTENERS ==========
+    document.getElementById('resetChatBtn').addEventListener('click', resetChat);
+    
+    const sendBtn = document.getElementById('sendChatBtn');
+    const chatInput = document.getElementById('chatTextInput');
+    
+    function handleSendMessage() {
+        const msg = chatInput.value.trim();
+        if (msg === "" || isGenerating) return;
+        sendMessage(msg);
+    }
+    
+    sendBtn.addEventListener('click', handleSendMessage);
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSendMessage();
+        }
+    });
+    
+    // Initialize chat
+    resetChat();
+    
+    // Make modal functions globally accessible
+    window.closeModal = closeModal;
+    window.nextToTime = nextToTime;
+    window.prevToDate = prevToDate;
+    window.nextToForm = nextToForm;
+    window.prevToTime = prevToTime;
+    window.openCalendar = openCalendar;
 </script>
-
 </body>
 </html>
